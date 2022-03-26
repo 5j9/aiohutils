@@ -45,7 +45,7 @@ def session_fixture_factory(main_module):
 
             class FakeSession:
                 @staticmethod
-                async def get(_):
+                async def get(*_, **__):
                     return FakeResponse()
 
             main_module.SESSION = FakeSession()
