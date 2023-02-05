@@ -38,9 +38,10 @@ def session_fixture_factory(main_module):
         session = main_module.Session()
 
         if RECORD_MODE:
+            original_get = session.get
 
             async def recording_get(*args, **kwargs):
-                resp = await session.get(*args, **kwargs)
+                resp = await original_get(*args, **kwargs)
                 content = await resp.read()
                 with open(FakeResponse.file, 'wb') as f:
                     f.write(content)
