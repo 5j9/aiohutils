@@ -1,6 +1,5 @@
 from asyncio import new_event_loop
 from unittest.mock import patch
-from os import getenv
 
 from pytest import fixture
 from decouple import config
