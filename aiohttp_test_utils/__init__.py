@@ -1,12 +1,18 @@
+__version__ = '0.0.1.dev0'
+
 from asyncio import new_event_loop
 from unittest.mock import patch
 
 from pytest import fixture
 from decouple import config
-
+from pytest_socket import disable_socket
 
 RECORD_MODE = config('RECORD_MODE', False, cast=bool)
 OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
+
+
+if OFFLINE_MODE:
+    disable_socket()
 
 
 class FakeResponse:
