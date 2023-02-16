@@ -5,14 +5,15 @@ from unittest.mock import patch
 
 from pytest import fixture
 from decouple import config
-from pytest_socket import disable_socket
-
-RECORD_MODE = config('RECORD_MODE', False, cast=bool)
-OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
 
 
-if OFFLINE_MODE:
-    disable_socket()
+def init_tests():
+    global RECORD_MODE, OFFLINE_MODE, TESTS_PATH
+
+    config.search_path = TESTS_PATH = config._caller_path()
+
+    RECORD_MODE = config('RECORD_MODE', False, cast=bool)
+    OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
 
 
 class FakeResponse:
@@ -68,4 +69,4 @@ def event_loop():
 
 
 def file(filename):
-    return patch.object(FakeResponse, 'file', f'{__file__}/../../testdata/{filename}')
+    return patch.object(FakeResponse, 'file', f'{TESTS_PATH}/testdata/{filename}')
