@@ -24,6 +24,7 @@ class FakeResponse:
 
     file = ''
     url = EqualToEverything()
+    history = ()
 
     async def read(self):
         with open(self.file, 'rb') as f:
