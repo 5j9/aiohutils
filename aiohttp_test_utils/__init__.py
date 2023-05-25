@@ -16,9 +16,14 @@ def init_tests():
     OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
 
 
+class EqualToEverything:
+    def __eq__(self, other):
+        return True
+
 class FakeResponse:
 
     file = ''
+    url = EqualToEverything()
 
     async def read(self):
         with open(self.file, 'rb') as f:
