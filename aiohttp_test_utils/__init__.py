@@ -1,4 +1,4 @@
-__version__ = '0.3.1.dev0'
+__version__ = '0.4.0'
 
 from asyncio import new_event_loop
 from unittest.mock import patch
