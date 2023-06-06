@@ -1,5 +1,5 @@
 __version__ = '0.4.1.dev0'
-
+import atexit
 from asyncio import new_event_loop
 from unittest.mock import patch
 
@@ -8,12 +8,13 @@ from pytest import fixture
 
 
 def init_tests():
-    global RECORD_MODE, OFFLINE_MODE, TESTS_PATH
+    global RECORD_MODE, OFFLINE_MODE, TESTS_PATH, REMOVE_UNUSED_TESTDATA
 
     config.search_path = TESTS_PATH = config._caller_path()
 
     RECORD_MODE = config('RECORD_MODE', False, cast=bool)
     OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
+    REMOVE_UNUSED_TESTDATA = config('REMOVE_UNUSED_TESTDATA', False, cast=bool) and OFFLINE_MODE
 
 
 class EqualToEverything:
@@ -74,5 +75,20 @@ def event_loop():
     loop.close()
 
 
+def remove_unsed_file_names():
+    if REMOVE_UNUSED_TESTDATA is not True:
+        return
+    import os
+    for filename in set(os.listdir(f'{TESTS_PATH}/testdata/')) - USED_FILENAMES:
+        os.remove(f'{TESTS_PATH}/testdata/{filename}')
+        print(f'removed unsed file: {filename}')
+
+
+USED_FILENAMES = set()
+atexit.register(remove_unsed_file_names)
+
+
 def file(filename):
+    if REMOVE_UNUSED_TESTDATA is True:
+        USED_FILENAMES.add(filename)
     return patch.object(FakeResponse, 'file', f'{TESTS_PATH}/testdata/{filename}')
