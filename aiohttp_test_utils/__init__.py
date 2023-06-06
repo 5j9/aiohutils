@@ -85,7 +85,7 @@ def remove_unused_testdata():
         return
     for filename in unused_testdata:
         os.remove(f'{TESTS_PATH}/testdata/{filename}')
-        print(f'REMOVE_UNUSED_TESTDATA: {filename}')
+        print(f'REMOVE_UNUSED_TESTDATA: removed {filename}')
 
 
 USED_FILENAMES = set()
