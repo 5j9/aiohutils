@@ -75,17 +75,21 @@ def event_loop():
     loop.close()
 
 
-def remove_unsed_file_names():
+def remove_unused_testdata():
     if REMOVE_UNUSED_TESTDATA is not True:
         return
     import os
-    for filename in set(os.listdir(f'{TESTS_PATH}/testdata/')) - USED_FILENAMES:
+    unused_testdata = set(os.listdir(f'{TESTS_PATH}/testdata/')) - USED_FILENAMES
+    if not unused_testdata:
+        print('REMOVE_UNUSED_TESTDATA: no action required')
+        return
+    for filename in unused_testdata:
         os.remove(f'{TESTS_PATH}/testdata/{filename}')
-        print(f'removed unsed file: {filename}')
+        print(f'removed unused testdata: {filename}')
 
 
 USED_FILENAMES = set()
-atexit.register(remove_unsed_file_names)
+atexit.register(remove_unused_testdata)
 
 
 def file(filename):
