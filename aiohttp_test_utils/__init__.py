@@ -1,6 +1,8 @@
 __version__ = '0.5.1.dev0'
 import atexit
 from asyncio import new_event_loop
+from itertools import cycle
+from typing import Iterator
 from unittest.mock import patch
 
 from decouple import config
@@ -14,18 +16,24 @@ def init_tests():
 
     RECORD_MODE = config('RECORD_MODE', False, cast=bool)
     OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
-    REMOVE_UNUSED_TESTDATA = config('REMOVE_UNUSED_TESTDATA', False, cast=bool) and OFFLINE_MODE
+    REMOVE_UNUSED_TESTDATA = (
+        config('REMOVE_UNUSED_TESTDATA', False, cast=bool) and OFFLINE_MODE
+    )
 
 
 class EqualToEverything:
     def __eq__(self, other):
         return True
 
-class FakeResponse:
 
-    file = ''
+class FakeResponse:
+    files: Iterator = None
     url = EqualToEverything()
     history = ()
+
+    @property
+    def file(self) -> str:
+        return next(self.files)
 
     async def read(self):
         with open(self.file, 'rb') as f:
@@ -34,7 +42,6 @@ class FakeResponse:
 
 
 def session_fixture_factory(main_module):
-
     @fixture(scope='session', autouse=True)
     async def session():
         if OFFLINE_MODE:
@@ -56,7 +63,7 @@ def session_fixture_factory(main_module):
             async def recording_get(*args, **kwargs):
                 resp = await original_get(*args, **kwargs)
                 content = await resp.read()
-                with open(FakeResponse.file, 'wb') as f:
+                with open(FakeResponse().file, 'wb') as f:
                     f.write(content)
                 return resp
 
@@ -79,7 +86,10 @@ def remove_unused_testdata():
     if REMOVE_UNUSED_TESTDATA is not True:
         return
     import os
-    unused_testdata = set(os.listdir(f'{TESTS_PATH}/testdata/')) - USED_FILENAMES
+
+    unused_testdata = (
+        set(os.listdir(f'{TESTS_PATH}/testdata/')) - USED_FILENAMES
+    )
     if not unused_testdata:
         print('REMOVE_UNUSED_TESTDATA: no action required')
         return
@@ -92,7 +102,22 @@ USED_FILENAMES = set()
 atexit.register(remove_unused_testdata)
 
 
-def file(filename):
+def file(filename: str):
     if REMOVE_UNUSED_TESTDATA is True:
         USED_FILENAMES.add(filename)
-    return patch.object(FakeResponse, 'file', f'{TESTS_PATH}/testdata/{filename}')
+    return patch.object(
+        FakeResponse,
+        'files',
+        cycle([f'{TESTS_PATH}/testdata/{filename}']),
+    )
+
+
+def files(*filenames: str):
+    if REMOVE_UNUSED_TESTDATA is True:
+        for filename in filenames:
+            USED_FILENAMES.add(filename)
+    return patch.object(
+        FakeResponse,
+        'files',
+        (f'{TESTS_PATH}/testdata/{filename}' for filename in filenames),
+    )
