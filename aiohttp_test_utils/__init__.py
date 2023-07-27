@@ -8,6 +8,8 @@ from unittest.mock import patch
 from decouple import config
 from pytest import fixture
 
+RECORD_MODE = OFFLINE_MODE = TESTS_PATH = REMOVE_UNUSED_TESTDATA = None
+
 
 def init_tests():
     global RECORD_MODE, OFFLINE_MODE, TESTS_PATH, REMOVE_UNUSED_TESTDATA
