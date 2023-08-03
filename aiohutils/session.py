@@ -1,5 +1,5 @@
+import asyncio
 import atexit
-from asyncio import run
 from warnings import warn
 
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
@@ -11,9 +11,12 @@ class SessionManager:
     def __init__(
         self,
         args=(),
-        kwargs={},
+        kwargs=None,
     ):
         self._args = args
+
+        if kwargs is None:
+            kwargs = {}
         self._kwargs = {
             'timeout': ClientTimeout(
                 total=60.0, sock_connect=30.0, sock_read=30.0
@@ -28,17 +31,17 @@ class SessionManager:
             session = self._session = ClientSession(
                 *self._args, **self._kwargs
             )
-            atexit.register(self.close)
+            atexit.register(asyncio.run, session.close())
         return session
 
-    def _check_response(self, response: ClientResponse):
+    @staticmethod
+    def _check_response(response: ClientResponse):
         if response.history:
-            warn(f'r.history is not empty (possible redirection): {r.history}')
+            warn(
+                f'r.history is not empty (possible redirection): {response.history}'
+            )
 
     async def get(self, *args, **kwargs) -> ClientResponse:
         resp = await self.session.get(*args, **kwargs)
         self._check_response(resp)
         return resp
-
-    def close(self):
-        run(self.session.close())
