@@ -1,3 +1,5 @@
+import atexit
+from asyncio import run
 from warnings import warn
 
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
@@ -26,15 +28,8 @@ class SessionManager:
             session = self._session = ClientSession(
                 *self._args, **self._kwargs
             )
+            atexit.register(self.close)
         return session
-
-    @session.setter
-    def session(self, session: ClientSession):
-        self._session = session
-
-    @session.deleter
-    def session(self):
-        del self._session
 
     def _check_response(self, response: ClientResponse):
         if response.history:
@@ -45,6 +40,5 @@ class SessionManager:
         self._check_response(resp)
         return resp
 
-    async def close(self):
-        if (s := self.session) is not None:
-            await s.close()
+    def close(self):
+        run(self.session.close())
