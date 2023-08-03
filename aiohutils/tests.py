@@ -7,7 +7,7 @@ from unittest.mock import patch
 from decouple import config
 from pytest import fixture
 
-from aiohutils.session import _SessionManager
+from aiohutils.session import SessionManager
 
 RECORD_MODE = OFFLINE_MODE = TESTS_PATH = REMOVE_UNUSED_TESTDATA = None
 
@@ -53,12 +53,12 @@ async def session():
             async def get(*_, **__):
                 return FakeResponse()
 
-        _SessionManager.session = FakeSession()
+        SessionManager.session = FakeSession()
         yield
-        del _SessionManager.session
+        del SessionManager.session
         return
 
-    sm = _SessionManager()
+    sm = SessionManager()
 
     if RECORD_MODE:
         original_get = sm.get
