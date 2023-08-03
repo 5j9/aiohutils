@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "aiohutils"
 authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
 license = {text = "GNU General Public License v3 (GPLv3)"}
-description = "a small library used for testing aiohttp projects"
+description = "A small library to for aiohttp projects."
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3.10",
