@@ -73,7 +73,7 @@ async def session():
         sm.get = recording_get
 
     yield
-    await sm.close()
+    return
 
 
 @fixture(scope='session')
