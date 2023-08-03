@@ -1,4 +1,3 @@
-__version__ = '0.5.1.dev0'
 import atexit
 from asyncio import new_event_loop
 from itertools import cycle
@@ -7,6 +6,8 @@ from unittest.mock import patch
 
 from decouple import config
 from pytest import fixture
+
+from aiohutils.session import _SessionManager
 
 RECORD_MODE = OFFLINE_MODE = TESTS_PATH = REMOVE_UNUSED_TESTDATA = None
 
@@ -43,38 +44,36 @@ class FakeResponse:
         return content
 
 
-def session_fixture_factory(main_module):
-    @fixture(scope='session', autouse=True)
-    async def session():
-        if OFFLINE_MODE:
+@fixture(scope='session', autouse=True)
+async def session():
+    if OFFLINE_MODE:
 
-            class FakeSession:
-                @staticmethod
-                async def get(*_, **__):
-                    return FakeResponse()
+        class FakeSession:
+            @staticmethod
+            async def get(*_, **__):
+                return FakeResponse()
 
-            main_module.SESSION = FakeSession()
-            yield
-            return
-
-        session = main_module.Session()
-
-        if RECORD_MODE:
-            original_get = session.get
-
-            async def recording_get(*args, **kwargs):
-                resp = await original_get(*args, **kwargs)
-                content = await resp.read()
-                with open(FakeResponse().file, 'wb') as f:
-                    f.write(content)
-                return resp
-
-            session.get = recording_get
-
+        _SessionManager.session = FakeSession()
         yield
-        await session.close()
+        del _SessionManager.session
+        return
 
-    return session
+    sm = _SessionManager()
+
+    if RECORD_MODE:
+        original_get = sm.get
+
+        async def recording_get(*args, **kwargs):
+            resp = await original_get(*args, **kwargs)
+            content = await resp.read()
+            with open(FakeResponse().file, 'wb') as f:
+                f.write(content)
+            return resp
+
+        sm.get = recording_get
+
+    yield
+    await sm.close()
 
 
 @fixture(scope='session')
