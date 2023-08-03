@@ -8,15 +8,8 @@ from aiohttp import ClientResponse, ClientSession, ClientTimeout
 class SessionManager:
     __slots__ = ('_session', '_args', '_kwargs')
 
-    def __init__(
-        self,
-        args=(),
-        kwargs=None,
-    ):
+    def __init__(self, *args, **kwargs):
         self._args = args
-
-        if kwargs is None:
-            kwargs = {}
         self._kwargs = {
             'timeout': ClientTimeout(
                 total=60.0, sock_connect=30.0, sock_read=30.0
