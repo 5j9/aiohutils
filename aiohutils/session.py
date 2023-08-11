@@ -31,7 +31,7 @@ class SessionManager:
     def _check_response(response: ClientResponse):
         if response.history:
             warn(
-                f'r.history is not empty (possible redirection): {response.history}'
+                f'redirection from {response.history[0].url} to {response.url}'
             )
 
     async def get(self, *args, **kwargs) -> ClientResponse:
