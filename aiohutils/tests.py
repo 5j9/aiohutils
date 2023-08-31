@@ -122,3 +122,13 @@ def files(*filenames: str):
         'files',
         (f'{TESTS_PATH}/testdata/{filename}' for filename in filenames),
     )
+
+
+def assert_dict_type(d: dict, td: callable):
+    assert td.__optional_keys__ == (d.keys() - td.__required_keys__)
+    for k, t in td.__annotations__.items():
+        v = d[k]
+        if isinstance(v, dict):
+            assert_dict_type(v, t)
+            continue
+        assert isinstance(v, t), f'{td=} {k=} {v=} {t=}'
