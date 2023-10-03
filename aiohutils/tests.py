@@ -1,7 +1,7 @@
 import atexit
 from asyncio import new_event_loop
 from itertools import cycle
-from typing import Iterator, is_typeddict, NotRequired, get_origin, get_args
+from typing import Iterator, NotRequired, get_args, get_origin, is_typeddict
 from unittest.mock import patch
 
 from decouple import config
