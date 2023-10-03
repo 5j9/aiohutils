@@ -7,7 +7,7 @@ from unittest.mock import patch
 from decouple import config
 from pytest import fixture
 
-from aiohutils.session import SessionManager
+from aiohutils.session import ClientSession, SessionManager
 
 RECORD_MODE = OFFLINE_MODE = TESTS_PATH = REMOVE_UNUSED_TESTDATA = None
 
@@ -58,10 +58,8 @@ async def session():
         del SessionManager.session
         return
 
-    sm = SessionManager()
-
     if RECORD_MODE:
-        original_get = sm.get
+        original_get = ClientSession.get
 
         async def recording_get(*args, **kwargs):
             resp = await original_get(*args, **kwargs)
@@ -70,7 +68,11 @@ async def session():
                 f.write(content)
             return resp
 
-        sm.get = recording_get
+        ClientSession.get = recording_get
+
+        yield
+        ClientSession.get = original_get
+        return
 
     yield
     return
