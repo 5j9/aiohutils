@@ -1,7 +1,7 @@
 import atexit
 from asyncio import new_event_loop
 from itertools import cycle
-from typing import Iterator
+from typing import Iterator, is_typeddict, NotRequired, get_origin, get_args
 from unittest.mock import patch
 
 from decouple import config
@@ -127,10 +127,13 @@ def files(*filenames: str):
 
 
 def assert_dict_type(d: dict, td: callable):
-    assert td.__optional_keys__ == (d.keys() - td.__required_keys__)
-    for k, t in td.__annotations__.items():
-        v = d[k]
-        if isinstance(v, dict):
-            assert_dict_type(v, t)
+    assert td.__optional_keys__ >= (d.keys() - td.__required_keys__)
+    annotations = td.__annotations__
+    for k, v in d.items():
+        expected_type = annotations[k]
+        if is_typeddict(expected_type):
+            assert_dict_type(v, expected_type)
             continue
-        assert isinstance(v, t), f'{td=} {k=} {v=} {t=}'
+        if get_origin(expected_type) is NotRequired:
+            expected_type = get_args(expected_type)
+        assert isinstance(v, expected_type), f'{k=} {v=} {expected_type=}'
