@@ -127,7 +127,11 @@ def files(*filenames: str):
 
 
 def assert_dict_type(d: dict, td: callable):
-    assert td.__optional_keys__ >= (d.keys() - td.__required_keys__)
+    not_required = d.keys() - td.__required_keys__
+    assert td.__optional_keys__ >= not_required, (
+        'the following keys are neither required nor optional:\n'
+        f'{not_required - td.__optional_keys__}'
+    )
     annotations = td.__annotations__
     for k, v in d.items():
         expected_type = annotations[k]
