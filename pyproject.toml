@@ -20,7 +20,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-anyio",
+    "pytest-aio",
     "python-decouple",
 ]
 
@@ -49,4 +49,5 @@ extend-select = [
 ]
 ignore = [
     'UP027',  # list comprehensions are faster than generator expressions
+    'E721',  # Do not compare types, use `isinstance()`; I know what I'm doing.
 ]
