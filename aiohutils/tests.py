@@ -1,11 +1,12 @@
 import atexit
 from collections.abc import Iterator
+from inspect import iscoroutinefunction
 from itertools import cycle
 from typing import NotRequired, get_args, get_origin, is_typeddict
 from unittest.mock import patch
 
 from decouple import config
-from pytest import fixture
+from pytest import Function, fixture
 
 from aiohutils.session import ClientSession, SessionManager
 
@@ -44,8 +45,9 @@ class FakeResponse:
         return content
 
 
-@fixture(scope='session', autouse=True)
+@fixture(scope='session')
 async def session():
+    print('inside session fixture')
     if OFFLINE_MODE:
 
         class FakeSession:
@@ -76,6 +78,12 @@ async def session():
 
     yield
     return
+
+
+def pytest_collection_modifyitems(items: list[Function]):
+    for item in items:
+        if iscoroutinefunction(item.obj):
+            item.fixturenames.append('session')
 
 
 def remove_unused_testdata():
