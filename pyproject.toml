@@ -11,7 +11,7 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3.10",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "aiohttp[speedups]",
 ]
@@ -20,7 +20,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-asyncio",
+    "pytest-anyio",
     "python-decouple",
 ]
 
@@ -40,6 +40,13 @@ include-package-data = false
 version = {attr = "aiohutils.__version__"}
 
 [tool.ruff]
-format.quote-style = 'single'
 line-length = 79
+format.quote-style = 'single'
 isort.combine-as-imports = true
+extend-select = [
+    'I',  # isort
+    'UP',  # pyupgrade
+]
+ignore = [
+    'UP027',  # list comprehensions are faster than generator expressions
+]

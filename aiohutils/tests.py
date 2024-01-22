@@ -1,7 +1,7 @@
 import atexit
-from asyncio import new_event_loop
+from collections.abc import Iterator
 from itertools import cycle
-from typing import Iterator, NotRequired, get_args, get_origin, is_typeddict
+from typing import NotRequired, get_args, get_origin, is_typeddict
 from unittest.mock import patch
 
 from decouple import config
@@ -76,13 +76,6 @@ async def session():
 
     yield
     return
-
-
-@fixture(scope='session')
-def event_loop():
-    loop = new_event_loop()
-    yield loop
-    loop.close()
 
 
 def remove_unused_testdata():
