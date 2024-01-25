@@ -13,7 +13,8 @@ classifiers = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp[speedups]",
+    'aiohttp[speedups]',
+    'html5lib',  # pd.read_html requires html5lib
 ]
 dynamic = ["version"]
 
