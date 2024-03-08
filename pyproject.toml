@@ -15,6 +15,7 @@ requires-python = ">=3.12"
 dependencies = [
     'aiohttp[speedups]',
     'html5lib',  # pd.read_html requires html5lib
+    'pandas[pyarrow] >= 2.2.1',
 ]
 dynamic = ["version"]
 
