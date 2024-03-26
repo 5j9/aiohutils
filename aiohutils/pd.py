@@ -1,12 +1,10 @@
 from io import StringIO
-from warnings import warn
 
 from pandas import read_html
 from polars import DataFrame, from_pandas
 
 
 def html_to_df(html: str, index=0, /, **kwargs) -> DataFrame:
-    warn('use from_html instead', DeprecationWarning)
     return read_html(StringIO(html), **kwargs)[index]
 
 
