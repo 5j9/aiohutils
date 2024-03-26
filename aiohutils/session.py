@@ -1,15 +1,18 @@
 import asyncio
 import atexit
+from collections.abc import Callable
 from warnings import warn
 
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
 
 
 class SessionManager:
-    __slots__ = ('_session', '_args', '_kwargs')
+    __slots__ = ('_session', '_args', '_kwargs', '_connector')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, connector: Callable = None, **kwargs):
         self._args = args
+        self._connector = connector
+
         self._kwargs = {
             'timeout': ClientTimeout(
                 total=60.0, sock_connect=30.0, sock_read=30.0
@@ -22,7 +25,7 @@ class SessionManager:
             session = self._session
         except AttributeError:
             session = self._session = ClientSession(
-                *self._args, **self._kwargs
+                *self._args, connector=self._connector(), **self._kwargs
             )
             atexit.register(asyncio.run, session.close())
         return session
