@@ -3,13 +3,18 @@ import atexit
 from collections.abc import Callable
 from warnings import warn
 
-from aiohttp import ClientResponse, ClientSession, ClientTimeout
+from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
 
 class SessionManager:
     __slots__ = ('_session', '_args', '_kwargs', '_connector')
 
-    def __init__(self, *args, connector: Callable = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        connector: Callable[[], TCPConnector | None] = lambda: None,
+        **kwargs,
+    ):
         self._args = args
         self._connector = connector
 
