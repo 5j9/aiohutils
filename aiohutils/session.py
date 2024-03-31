@@ -1,7 +1,6 @@
 import asyncio
 import atexit
 from collections.abc import Callable
-from logging import info
 from warnings import warn
 
 from aiohttp import (
@@ -49,11 +48,12 @@ class SessionManager:
                 f'redirection from {response.history[0].url} to {response.url}'
             )
 
-    async def get(self, *args, **kwargs) -> ClientResponse:
+    async def get(self, *args, retry=3, **kwargs) -> ClientResponse:
         try:
             resp = await self.session.get(*args, **kwargs)
         except ServerDisconnectedError:
-            info('ServerDisconnectedError; will retry instantly')
-            return await self.get(*args, **kwargs)
+            if retry >= 0:
+                return await self.get(*args, retry=retry - 1, **kwargs)
+            raise
         self._check_response(resp)
         return resp
