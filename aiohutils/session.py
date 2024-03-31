@@ -1,9 +1,16 @@
 import asyncio
 import atexit
 from collections.abc import Callable
+from logging import info
 from warnings import warn
 
-from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
+from aiohttp import (
+    ClientResponse,
+    ClientSession,
+    ClientTimeout,
+    ServerDisconnectedError,
+    TCPConnector,
+)
 
 
 class SessionManager:
@@ -43,6 +50,10 @@ class SessionManager:
             )
 
     async def get(self, *args, **kwargs) -> ClientResponse:
-        resp = await self.session.get(*args, **kwargs)
+        try:
+            resp = await self.session.get(*args, **kwargs)
+        except ServerDisconnectedError:
+            info('ServerDisconnectedError; will retry instantly')
+            return await self.get(*args, **kwargs)
         self._check_response(resp)
         return resp
