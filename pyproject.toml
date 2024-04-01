@@ -25,6 +25,7 @@ test = [
     "pytest-aio",
     "python-decouple",
 ]
+pl = ['polars']  # optional dependency until migration of dependant libraries is completed
 
 [project.readme]
 file = "README.rst"
