@@ -7,11 +7,13 @@ from aiohttp.web_routedef import RouteDef, get
 
 
 def static_path(file: Path) -> tuple[str, RouteDef]:
-    get_path = f'/static/{adler32(str(file.absolute()).encode())}/{file.name}'
+    serve_path = (
+        f'/static/{adler32(str(file.absolute()).encode())}/{file.name}'
+    )
 
     async def handler(_: Request) -> FileResponse:
         return FileResponse(
             file, headers={'Cache-Control': 'immutable,   max-age=604800'}
         )
 
-    return get_path, get(get_path, handler)
+    return serve_path, get(serve_path, handler)
