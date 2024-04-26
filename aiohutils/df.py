@@ -1,7 +1,10 @@
 from io import StringIO
+from warnings import warn
 
 from pandas import read_html
 from polars import DataFrame, from_pandas
+
+warn('aiohutils.df will be deprecated', PendingDeprecationWarning, 2)
 
 
 def from_html(html: str, index=0, /, **kwargs) -> DataFrame | list[DataFrame]:
