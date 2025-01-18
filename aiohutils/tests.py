@@ -31,7 +31,8 @@ class EqualToEverything:
 
 
 class FakeResponse:
-    files: Iterator | None = None
+    __slots__ = 'files'
+    files: Iterator
     url = EqualToEverything()
     history = ()
 
