@@ -1,8 +1,8 @@
 import atexit
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Iterator, Mapping
 from inspect import iscoroutinefunction
 from itertools import cycle
-from typing import NotRequired, get_args, get_origin, is_typeddict
+from typing import NotRequired, TypedDict, get_args, get_origin, is_typeddict
 from unittest.mock import patch
 
 from decouple import config
@@ -131,14 +131,14 @@ def files(*filenames: str):
     )
 
 
-def assert_dict_type(d: Mapping, typed_dct: Callable):
-    not_required = d.keys() - typed_dct.__required_keys__
+def assert_dict_type(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
+    not_required = dct.keys() - typed_dct.__required_keys__
     assert typed_dct.__optional_keys__ >= not_required, (
         'the following keys are neither required nor optional:\n'
         f'{not_required - typed_dct.__optional_keys__}'
     )
     annotations = typed_dct.__annotations__
-    for k, v in d.items():
+    for k, v in dct.items():
         expected_type = annotations[k]
         if is_typeddict(expected_type):
             assert_dict_type(v, expected_type)
