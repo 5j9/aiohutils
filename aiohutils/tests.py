@@ -1,5 +1,5 @@
 import atexit
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator, Mapping
 from inspect import iscoroutinefunction
 from itertools import cycle
 from typing import NotRequired, get_args, get_origin, is_typeddict
@@ -31,7 +31,7 @@ class EqualToEverything:
 
 
 class FakeResponse:
-    files: Iterator = None
+    files: Iterator | None = None
     url = EqualToEverything()
     history = ()
 
@@ -44,6 +44,9 @@ class FakeResponse:
             content = f.read()
         return content
 
+    def raise_for_status(self):
+        pass
+
 
 @fixture(scope='session')
 async def session():
@@ -55,9 +58,10 @@ async def session():
             async def get(*_, **__):
                 return FakeResponse()
 
-        SessionManager.session = FakeSession()
+        orig_session = SessionManager.session
+        SessionManager.session = FakeSession()  # type: ignore
         yield
-        del SessionManager.session
+        SessionManager.session = orig_session  # type: ignore
         return
 
     if RECORD_MODE:
@@ -70,7 +74,7 @@ async def session():
                 f.write(content)
             return resp
 
-        ClientSession.get = recording_get
+        ClientSession.get = recording_get  # type: ignore
 
         yield
         ClientSession.get = original_get
@@ -127,13 +131,13 @@ def files(*filenames: str):
     )
 
 
-def assert_dict_type(d: dict, td: callable):
-    not_required = d.keys() - td.__required_keys__
-    assert td.__optional_keys__ >= not_required, (
+def assert_dict_type(d: Mapping, typed_dct: Callable):
+    not_required = d.keys() - typed_dct.__required_keys__
+    assert typed_dct.__optional_keys__ >= not_required, (
         'the following keys are neither required nor optional:\n'
-        f'{not_required - td.__optional_keys__}'
+        f'{not_required - typed_dct.__optional_keys__}'
     )
-    annotations = td.__annotations__
+    annotations = typed_dct.__annotations__
     for k, v in d.items():
         expected_type = annotations[k]
         if is_typeddict(expected_type):

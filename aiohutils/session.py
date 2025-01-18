@@ -43,6 +43,7 @@ class SessionManager:
 
     @staticmethod
     def _check_response(response: ClientResponse):
+        response.raise_for_status()
         if response.history:
             warn(
                 f'redirection from {response.history[0].url} to {response.url}'
