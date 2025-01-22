@@ -1,7 +1,7 @@
 import asyncio
 import atexit
 from collections.abc import Callable
-from warnings import warn
+from logging import warning
 
 from aiohttp import (
     ClientResponse,
@@ -10,6 +10,8 @@ from aiohttp import (
     ServerDisconnectedError,
     TCPConnector,
 )
+
+_warned = set()
 
 
 class SessionManager:
@@ -44,10 +46,12 @@ class SessionManager:
     @staticmethod
     def _check_response(response: ClientResponse):
         response.raise_for_status()
-        if response.history:
-            warn(
-                f'redirection from {response.history[0].url} to {response.url}'
-            )
+        if not (hist := response.history):
+            return
+        if (url := str(response.url)) in _warned:
+            return
+        warning(f'redirection from {hist[0].url} to {url}')
+        _warned.add(url)
 
     async def get(self, *args, retry=3, **kwargs) -> ClientResponse:
         try:
