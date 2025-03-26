@@ -22,7 +22,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-aio",
+    "pytest-asyncio",
     "python-decouple",
 ]
 
