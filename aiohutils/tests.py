@@ -10,17 +10,20 @@ from pytest import Function, fixture
 
 from aiohutils.session import ClientSession, SessionManager
 
-RECORD_MODE = OFFLINE_MODE = TESTS_PATH = REMOVE_UNUSED_TESTDATA = None
+RECORD_MODE: bool = False
+OFFLINE_MODE: bool = True
+TESTS_PATH: str
+REMOVE_UNUSED_TESTDATA: bool = False
 
 
 def init_tests():
     global RECORD_MODE, OFFLINE_MODE, TESTS_PATH, REMOVE_UNUSED_TESTDATA
 
-    config.search_path = TESTS_PATH = config._caller_path()
+    config.search_path = TESTS_PATH = config._caller_path()  # type: ignore
 
-    RECORD_MODE = config('RECORD_MODE', False, cast=bool)
-    OFFLINE_MODE = config('OFFLINE_MODE', False, cast=bool) and not RECORD_MODE
-    REMOVE_UNUSED_TESTDATA = (
+    RECORD_MODE = config('RECORD_MODE', False, cast=bool)  # type: ignore
+    OFFLINE_MODE = config('OFFLINE_MODE', True, cast=bool) and not RECORD_MODE  # type: ignore
+    REMOVE_UNUSED_TESTDATA = (  # type: ignore
         config('REMOVE_UNUSED_TESTDATA', False, cast=bool) and OFFLINE_MODE
     )
 
