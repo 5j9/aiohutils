@@ -43,13 +43,15 @@ class FakeResponse:
     def file(self) -> str:
         return next(self.files)
 
-    async def read(self):
+    async def read(self) -> bytes:
         with open(self.file, 'rb') as f:
-            content = f.read()
-        return content
+            return f.read()
 
     def raise_for_status(self):
         pass
+
+    async def text(self) -> str:
+        return (await self.read()).decode()
 
 
 @fixture(scope='session')
