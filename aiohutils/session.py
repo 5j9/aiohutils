@@ -15,7 +15,7 @@ _warned = set()
 
 
 class SessionManager:
-    __slots__ = ('_session', '_args', '_kwargs', '_connector')
+    __slots__ = ('_args', '_connector', '_kwargs', '_session')
 
     def __init__(
         self,
