@@ -56,7 +56,6 @@ class FakeResponse:
 
 @fixture(scope='session')
 async def session():
-    print('inside session fixture')
     if OFFLINE_MODE:
 
         class FakeSession:
