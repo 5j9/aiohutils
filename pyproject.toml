@@ -1,6 +1,6 @@
 [build-system]
-requires = ['flit_core >=3.2,<4']
-build-backend = 'flit_core.buildapi'
+requires = ['uv_build>=0.8.3,<0.9.0']
+build-backend = 'uv_build'
 
 [project]
 name = "aiohutils"
@@ -17,7 +17,7 @@ dependencies = [
     'html5lib',                 # pd.read_html requires html5lib
     'pandas[pyarrow] >= 2.2.1',
 ]
-dynamic = ["version"]
+version = "0.22.2.dev0"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-asyncio", "python-decouple", "pydantic"]
@@ -29,6 +29,10 @@ dev = ["aiohutils[test]"]
 [tool.uv.sources]
 aiohutils = { workspace = true }
 
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "aiohutils"
 
 [project.readme]
 file = "README.rst"
@@ -43,17 +47,17 @@ format.quote-style = 'single'
 lint.isort.combine-as-imports = true
 lint.extend-select = [
     'W605', # invalid-escape-sequence
-    'FA',   # flake8-future-annotations
-    'I',    # isort
-    'UP',   # pyupgrade
-    'RUF',  # Ruff-specific rules (RUF)
+    'FA',  # flake8-future-annotations
+    'I',  # isort
+    'UP',  # pyupgrade
+    'RUF', # Ruff-specific rules (RUF)
 ]
 lint.ignore = [
-    'E721',   # Do not compare types, use `isinstance()`
-    'RUF001', # ambiguous-unicode-character-string	
-    'RUF002', # ambiguous-unicode-character-docstring
-    'RUF003', # ambiguous-unicode-character-comment
-    'RUF012', # mutable-class-default
+    'E721',  # Do not compare types, use `isinstance()`
+    'RUF001',  # ambiguous-unicode-character-string	
+    'RUF002',  # ambiguous-unicode-character-docstring
+    'RUF003',  # ambiguous-unicode-character-comment
+    'RUF012',  # mutable-class-default
 ]
 
 [tool.pytest.ini_options]
