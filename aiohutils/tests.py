@@ -2,10 +2,13 @@ import atexit
 from collections.abc import Iterator, Mapping
 from inspect import iscoroutinefunction
 from itertools import cycle
-from typing import NotRequired, TypedDict, get_args, get_origin, is_typeddict
+from typing import TypedDict
 from unittest.mock import patch
+from warnings import deprecated
 
 from decouple import config
+from pydantic import ConfigDict
+from pydantic.type_adapter import TypeAdapter
 from pytest import Function, fixture
 
 from aiohutils.session import ClientSession, SessionManager
@@ -136,18 +139,17 @@ def files(*filenames: str):
     )
 
 
+strict_config = ConfigDict(strict=True)
+
+
+def validate_typed_dict(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
+    # A trick to disallow extra keys. See
+    # https://stackoverflow.com/questions/77165374/runtime-checking-for-extra-keys-in-typeddict
+    # https://docs.pydantic.dev/2.4/concepts/strict_mode/#dataclasses-and-typeddict
+    typed_dct.__pydantic_config__ = strict_config  # type: ignore
+    TypeAdapter(typed_dct).validate_python(dct, strict=True)
+
+
+@deprecated('assert_dict_type is deprecated in favour of validate_typed_dict')
 def assert_dict_type(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
-    not_required = dct.keys() - typed_dct.__required_keys__
-    assert typed_dct.__optional_keys__ >= not_required, (
-        'the following keys are neither required nor optional:\n'
-        f'{not_required - typed_dct.__optional_keys__}'
-    )
-    annotations = typed_dct.__annotations__
-    for k, v in dct.items():
-        expected_type = annotations[k]
-        if is_typeddict(expected_type):
-            assert_dict_type(v, expected_type)
-            continue
-        if get_origin(expected_type) is NotRequired:
-            expected_type = get_args(expected_type)
-        assert isinstance(v, expected_type), f'{k=} {v=} {expected_type=}'
+    validate_typed_dict(dct, typed_dct)
