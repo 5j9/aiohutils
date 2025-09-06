@@ -83,7 +83,7 @@ speedups = [
 
 [[package]]
 name = "aiohutils"
-version = "0.22.2"
+version = "0.22.3.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp", extra = ["speedups"] },

@@ -17,7 +17,7 @@ dependencies = [
     'html5lib',                 # pd.read_html requires html5lib
     'pandas[pyarrow] >= 2.2.1',
 ]
-version = "0.22.2"
+version = "0.22.3.dev1"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-asyncio", "python-decouple", "pydantic"]
