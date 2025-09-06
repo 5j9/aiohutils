@@ -142,7 +142,7 @@ def files(*filenames: str):
 strict_config = ConfigDict(strict=True)
 
 
-def validate_typed_dict(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
+def validate_dict(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
     # A trick to disallow extra keys. See
     # https://stackoverflow.com/questions/77165374/runtime-checking-for-extra-keys-in-typeddict
     # https://docs.pydantic.dev/2.4/concepts/strict_mode/#dataclasses-and-typeddict
@@ -150,6 +150,6 @@ def validate_typed_dict(dct: Mapping, typed_dct: type[TypedDict]):  # type: igno
     TypeAdapter(typed_dct).validate_python(dct, strict=True)
 
 
-@deprecated('assert_dict_type is deprecated in favour of validate_typed_dict')
+@deprecated('assert_dict_type is deprecated in favour of validate_dict')
 def assert_dict_type(dct: Mapping, typed_dct: type[TypedDict]):  # type: ignore
-    validate_typed_dict(dct, typed_dct)
+    validate_dict(dct, typed_dct)
