@@ -32,11 +32,15 @@ def init_tests():
 
 
 class EqualToEverything:
+"""A placeholder object that always evaluates as equal."""
+
     def __eq__(self, other):
         return True
 
 
 class FakeResponse:
+    """A mock response object for offline mode."""
+
     __slots__ = 'files'
     files: Iterator
     url = EqualToEverything()
@@ -59,6 +63,7 @@ class FakeResponse:
 
 @fixture(scope='session')
 async def session():
+    """Pytest fixture to mock or record HTTP sessions."""
     if OFFLINE_MODE:
 
         class FakeSession:
@@ -93,12 +98,14 @@ async def session():
 
 
 def pytest_collection_modifyitems(items: list[Function]):
+    """Automatically apply the 'session' fixture to all async tests."""
     for item in items:
         if iscoroutinefunction(item.obj):
             item.fixturenames.append('session')
 
 
 def remove_unused_testdata():
+    """Removes test data files that were not used during the test run."""
     if REMOVE_UNUSED_TESTDATA is not True:
         return
     import os
@@ -119,6 +126,7 @@ atexit.register(remove_unused_testdata)
 
 
 def file(filename: str):
+    """Mocks the response files for a single file test case."""
     if REMOVE_UNUSED_TESTDATA is True:
         USED_FILENAMES.add(filename)
     return patch.object(
@@ -129,6 +137,7 @@ def file(filename: str):
 
 
 def files(*filenames: str):
+    """Mocks the response files for sequential file test cases."""
     if REMOVE_UNUSED_TESTDATA is True:
         for filename in filenames:
             USED_FILENAMES.add(filename)
