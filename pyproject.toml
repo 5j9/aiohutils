@@ -19,13 +19,6 @@ dependencies = [
 ]
 version = "0.22.4.dev1"
 
-[project.optional-dependencies]
-test = ["pytest", "pytest-asyncio", "python-decouple", "pydantic"]
-
-
-[dependency-groups]
-dev = ["aiohutils[test]"]
-
 [tool.uv.sources]
 aiohutils = { workspace = true }
 
