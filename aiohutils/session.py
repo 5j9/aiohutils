@@ -9,6 +9,7 @@ from aiohttp import (
     ClientTimeout,
     ServerDisconnectedError,
     TCPConnector,
+    ThreadedResolver,
 )
 
 _warned = set()
@@ -20,7 +21,9 @@ class SessionManager:
     def __init__(
         self,
         *args,
-        connector: Callable[[], TCPConnector | None] = lambda: None,
+        connector: Callable[[], TCPConnector | None] = lambda: TCPConnector(
+            resolver=ThreadedResolver()
+        ),
         **kwargs,
     ):
         self._args = args
