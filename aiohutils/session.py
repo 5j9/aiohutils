@@ -1,5 +1,3 @@
-import asyncio
-import atexit
 from collections.abc import Callable
 from logging import warning
 from typing import Unpack
@@ -45,8 +43,10 @@ class SessionManager:
             session = self._session = ClientSession(
                 *self._args, connector=self._connector(), **self._kwargs
             )
-            atexit.register(asyncio.run, session.close())
         return session
+
+    async def close(self):
+        await self.session.close()
 
     @staticmethod
     def _check_response(response: ClientResponse):
