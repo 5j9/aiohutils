@@ -2,15 +2,17 @@ import asyncio
 import atexit
 from collections.abc import Callable
 from logging import warning
+from typing import Unpack
+from warnings import deprecated
 
 from aiohttp import (
     ClientResponse,
     ClientSession,
     ClientTimeout,
-    ServerDisconnectedError,
     TCPConnector,
     ThreadedResolver,
 )
+from aiohttp.client import _RequestOptions
 
 _warned = set()
 
@@ -31,14 +33,14 @@ class SessionManager:
 
         self._kwargs = {
             'timeout': ClientTimeout(
-                total=60.0, sock_connect=30.0, sock_read=30.0
+                total=30.0, sock_connect=15.0, sock_read=15.0
             ),
         } | kwargs
 
     @property
     def session(self) -> ClientSession:
         try:
-            session = self._session
+            return self._session
         except AttributeError:
             session = self._session = ClientSession(
                 *self._args, connector=self._connector(), **self._kwargs
@@ -56,12 +58,25 @@ class SessionManager:
         warning(f'redirection from {hist[0].url} to {url}')
         _warned.add(url)
 
+    async def request(
+        self,
+        method: str,
+        url: str,
+        *args,
+        retry: int = 3,
+        **kwargs: Unpack[_RequestOptions],
+    ) -> ClientResponse:
+        while True:
+            try:
+                resp = await self.session.request(method, url, *args, **kwargs)
+                self._check_response(resp)
+                return resp
+            except OSError:
+                retry -= 1
+                if retry >= 0:
+                    continue
+                raise
+
+    @deprecated('use self.request("get", ...) instead')
     async def get(self, *args, retry=3, **kwargs) -> ClientResponse:
-        try:
-            resp = await self.session.get(*args, **kwargs)
-        except ServerDisconnectedError:
-            if retry >= 0:
-                return await self.get(*args, retry=retry - 1, **kwargs)
-            raise
-        self._check_response(resp)
-        return resp
+        return await self.request('get', *args, retry=retry - 1, **kwargs)
