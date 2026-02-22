@@ -17,7 +17,7 @@ dependencies = [
     'html5lib',                 # pd.read_html requires html5lib
     'pandas[pyarrow] >= 2.2.1',
 ]
-version = "0.24.1.dev1"
+version = "0.24.1"
 
 [tool.uv.sources]
 aiohutils = { workspace = true }
