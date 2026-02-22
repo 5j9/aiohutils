@@ -1,3 +1,5 @@
+import atexit
+from asyncio import new_event_loop
 from collections.abc import Callable
 from logging import warning
 from typing import Unpack
@@ -40,13 +42,18 @@ class SessionManager:
         try:
             return self._session
         except AttributeError:
-            session = self._session = ClientSession(
-                *self._args, connector=self._connector(), **self._kwargs
-            )
+            pass
+        session = self._session = ClientSession(
+            *self._args, connector=self._connector(), **self._kwargs
+        )
+        atexit.register(self._atexit)
         return session
 
-    async def close(self):
-        await self.session.close()
+    def _atexit(self):
+        loop = self.session._loop
+        if not loop.is_running():
+            loop = new_event_loop()
+        loop.run_until_complete(self.session.close())
 
     @staticmethod
     def _check_response(response: ClientResponse):
