@@ -24,7 +24,7 @@ class SessionManager:
         self,
         *args,
         connector: Callable[[], TCPConnector | None] = lambda: TCPConnector(
-            resolver=ThreadedResolver()
+            ttl_dns_cache=60 * 60 * 24, resolver=ThreadedResolver()
         ),
         **kwargs,
     ):
