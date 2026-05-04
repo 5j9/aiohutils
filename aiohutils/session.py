@@ -1,7 +1,6 @@
 import atexit
 from asyncio import new_event_loop
 from collections.abc import Callable
-from logging import warning
 from typing import Unpack
 from warnings import deprecated
 
@@ -13,6 +12,8 @@ from aiohttp import (
     ThreadedResolver,
 )
 from aiohttp.client import _RequestOptions
+
+from aiohutils import logger as _logger
 
 _warned = set()
 
@@ -62,7 +63,7 @@ class SessionManager:
             return
         if (url := str(response.url)) in _warned:
             return
-        warning(f'redirection from {hist[0].url} to {url}')
+        _logger.warning(f'redirection from {hist[0].url} to {url}')
         _warned.add(url)
 
     async def request(
