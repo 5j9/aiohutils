@@ -19,24 +19,24 @@ _warned = set()
 
 
 class SessionManager:
-    __slots__ = ('_args', '_connector', '_kwargs', '_session')
+    __slots__ = (
+        '_session',
+        'client_session_kwargs',
+        'connector',
+        'timeout',
+    )
 
     def __init__(
         self,
-        *args,
         connector: Callable[[], TCPConnector | None] = lambda: TCPConnector(
             ttl_dns_cache=60 * 60 * 24, resolver=ThreadedResolver()
         ),
-        **kwargs,
+        timeout: ClientTimeout = ClientTimeout(total=60.0, sock_connect=30.0),
+        **client_session_kwargs,
     ):
-        self._args = args
-        self._connector = connector
-
-        self._kwargs = {
-            'timeout': ClientTimeout(
-                total=30.0, sock_connect=15.0, sock_read=15.0
-            ),
-        } | kwargs
+        self.connector = connector
+        self.timeout = timeout
+        self.client_session_kwargs = client_session_kwargs
 
     @property
     def session(self) -> ClientSession:
@@ -45,10 +45,16 @@ class SessionManager:
         except AttributeError:
             pass
         session = self._session = ClientSession(
-            *self._args, connector=self._connector(), **self._kwargs
+            connector=self.connector(),
+            timeout=self.timeout,
+            **self.client_session_kwargs,
         )
         atexit.register(self._atexit)
         return session
+
+    @session.deleter
+    def _(self):
+        del self._session
 
     def _atexit(self):
         loop = self.session._loop
