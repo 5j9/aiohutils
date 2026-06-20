@@ -1,5 +1,3 @@
-import atexit
-from asyncio import new_event_loop
 from collections.abc import Callable
 from typing import Unpack
 from warnings import deprecated
@@ -37,30 +35,24 @@ class SessionManager:
         self.connector = connector
         self.timeout = timeout
         self.client_session_kwargs = client_session_kwargs
+        self._session: ClientSession | None = None
 
     @property
     def session(self) -> ClientSession:
-        try:
-            return self._session
-        except AttributeError:
-            pass
+        session = self._session
+        if session is not None:
+            return session
         session = self._session = ClientSession(
             connector=self.connector(),
             timeout=self.timeout,
             **self.client_session_kwargs,
         )
-        atexit.register(self._atexit)
         return session
 
-    @session.deleter
-    def _(self):
-        del self._session
-
-    def _atexit(self):
-        loop = self.session._loop
-        if not loop.is_running():
-            loop = new_event_loop()
-        loop.run_until_complete(self.session.close())
+    async def close(self):
+        session = self._session
+        if session is not None:
+            await session.close()
 
     @staticmethod
     def _check_response(response: ClientResponse):
