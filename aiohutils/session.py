@@ -49,7 +49,7 @@ class SessionManager:
         )
         return session
 
-    async def close(self):
+    async def aclose(self):
         session = self._session
         if session is not None:
             await session.close()
